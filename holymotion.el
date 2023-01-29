@@ -1,12 +1,8 @@
-;;; holymotion.el --- A port of vim's easymotion to emacs
+;;; holymotion.el --- evil-easymotion, purified of evil
 
-;; Copyright (C) 2014, 2015, 2016, 2018 PythonNut
-;; Copyright (C) 2017 wouter bolsterlee
-
-;; Author: PythonNut <pythonnut@pythonnut.com>
-;; Keywords: convenience, evil
+;; Author: Overdr0ne <scmorris.dev@gmail.com>
+;; Keywords: convenience
 ;; Version: 20160228
-;; URL: https://github.com/pythonnut/holymotion
 ;; Package-Requires: ((emacs "24") (avy "0.3.0") (cl-lib "0.5"))
 
 ;;; License:
@@ -25,7 +21,7 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; This is a clone of the popular easymotion package for vim, which
+;; This is a clone of the popular holymotion package for vim, which
 ;; describes itself in these terms:
 
 ;; > EasyMotion provides a much simpler way to use some motions in vim.
@@ -39,32 +35,26 @@
 ;; Usage/status
 ;; ============
 
-;; holymotion, rather unsurprisingly can use evil. However, you don't
-;; _need_ evil to use it. holymotion can happily define motions for
-;; regular emacs commands. With that said, evil is recommended, not
-;; least because it's awesome.
+;; This code was shamelessly forked from https://github.com/PythonNut/evil-easymotion
 
-;; Currently most motions are supported, and it's easy to define your own easymotions.
+;; Currently most motions are supported, and it's easy to define your own holymotions.
 
-;;   (holymotion-define (kbd "SPC w") 'evil-forward-word-begin)
+;;   (evilem-define (kbd "SPC w") 'evil-forward-word-begin)
 
-;; To define easymotions for all motions that evil defines by default, add
+;; To define holymotions for all motions that evil defines by default, add
 
-;;   (holymotion-default-keybindings "SPC")
+;;   (evilem-default-keybindings "SPC")
 
-;; This binds all motions under the prefix `SPC` in `evil-motion-state-map`. This is not done by default for motions defined manually. You will need to supply the prefix.
+;; This binds all motions under the prefix `SPC` in `holymotion-state-map`. This is not done by default for motions defined manually. You will need to supply the prefix.
 
 ;; More advanced use-cases are detailed in the github README.
 
 ;;; Code:
 (require 'cl-lib)
-
-(eval-when-compile
-  (require 'avy)
-  (require 'evil))
+(require 'avy)
 
 (defgroup holymotion nil
-  "Emulate vim-easymotion"
+  "Emulate vim-holymotion"
   :group 'convenience
   :prefix "holymotion-")
 
@@ -85,7 +75,6 @@
 (defvar holymotion-map (make-sparse-keymap)
   "Keymap used for the default bindings")
 
-;; macro helper, from evil source
 (eval-and-compile
   (defun holymotion--unquote (exp)
     "Return EXP unquoted."
@@ -121,12 +110,12 @@
 
 ;;;###autoload
 (defun holymotion--collect (func &optional
-                             scope
-                             all-windows
-                             initial-point
-                             sort-key
-                             collect-postprocess
-                             include-invisible)
+                                 scope
+                                 all-windows
+                                 initial-point
+                                 sort-key
+                                 collect-postprocess
+                                 include-invisible)
   "Repeatedly execute func, and collect the cursor positions into a list"
   (cl-letf ((points nil)
             (point nil)
@@ -182,62 +171,18 @@
                  #'holymotion--default-collect-postprocess)
              points)))
 
-(eval-and-compile
-  (defun holymotion--compute-inclusivity (funcs)
-    (when (and (= (length funcs) 1)
-               (evil-has-command-properties-p (car funcs)))
-      `(setq evil-this-type
-             ',(evil-get-command-property (car funcs) :type)))))
-
 (cl-defmacro holymotion-make-motion (name
-                                 funcs
-                                 &key
-                                 pre-hook
-                                 post-hook
-                                 bind
-                                 scope
-                                 all-windows
-                                 initial-point
-                                 push-jump
-                                 collect-postprocess
-                                 include-invisible)
-  "Automatically define an evil easymotion for `func', naming it `name'"
-  `(,(if all-windows
-         'evil-define-command
-       'evil-define-motion)
-    ,name (&optional _count)
-    (require 'avy)
-    (avy-with ,name
-      (evil-without-repeat
-        ,(holymotion--compute-inclusivity funcs)
-        (cl-letf* ,bind
-          ,(when (or push-jump (not scope))
-             '(evil--jumps-push))
-          ,(when pre-hook `(funcall ,(if (functionp pre-hook)
-                                         pre-hook
-                                       `(lambda () ,pre-hook))))
-          (holymotion--jump (holymotion--collect ,funcs
-                                         ,scope
-                                         ,all-windows
-                                         ,initial-point
-                                         ,collect-postprocess
-                                         ,include-invisible))
-          ,(when post-hook `(funcall ,(if (functionp post-hook)
-                                          post-hook
-                                        `(lambda () ,post-hook)))))))))
-
-(cl-defmacro holymotion-make-motion-plain (name
-                                       funcs
-                                       &key
-                                       pre-hook
-                                       post-hook
-                                       bind
-                                       scope
-                                       all-windows
-                                       initial-point
-                                       collect-postprocess
-                                       include-invisible)
-  "Automatically define a plain easymotion for `func', naming it `name'"
+                                     funcs
+                                     &key
+                                     pre-hook
+                                     post-hook
+                                     bind
+                                     scope
+                                     all-windows
+                                     initial-point
+                                     collect-postprocess
+                                     include-invisible)
+  "Automatically define an holymotion for `func', naming it `name'"
   `(defun ,name ()
      (interactive)
      (require 'avy)
@@ -247,27 +192,26 @@
                                         pre-hook
                                       `(lambda () ,pre-hook))))
          (holymotion--jump (holymotion--collect ,funcs
-                                        ,scope
-                                        ,all-windows
-                                        ,initial-point
-                                        ,collect-postprocess
-                                        ,include-invisible))
+                                                ,scope
+                                                ,all-windows
+                                                ,initial-point
+                                                ,collect-postprocess
+                                                ,include-invisible))
          ,(when post-hook `(funcall ,(if (functionp post-hook)
                                          post-hook
                                        `(lambda () ,post-hook))))))))
 
 (cl-defmacro holymotion-create (motions
-                            &key
-                            name
-                            pre-hook
-                            post-hook
-                            bind
-                            scope
-                            all-windows
-                            initial-point
-                            push-jump
-                            collect-postprocess
-                            include-invisible)
+                                &key
+                                name
+                                pre-hook
+                                post-hook
+                                bind
+                                scope
+                                all-windows
+                                initial-point
+                                collect-postprocess
+                                include-invisible)
   `(holymotion-make-motion
     ,(or (holymotion--unquote name)
          (intern (holymotion--make-name motions)))
@@ -278,261 +222,120 @@
     :scope ,scope
     :all-windows ,all-windows
     :initial-point ,initial-point
-    :push-jump ,push-jump
     :collect-postprocess ,collect-postprocess
     :include-invisible ,include-invisible))
 
-(cl-defmacro holymotion-create-plain (motions
-                                  &key
-                                  name
-                                  pre-hook
-                                  post-hook
-                                  bind
-                                  scope
-                                  all-windows
-                                  initial-point
-                                  collect-postprocess
-                                  include-invisible)
-  `(holymotion-make-motion-plain
-    ,(or (holymotion--unquote name)
-         (intern (holymotion--make-name motions)))
-    ,motions
-    :pre-hook ,pre-hook
-    :post-hook ,post-hook
-    :bind ,bind
-    :scope ,scope
-    :all-windows ,all-windows
-    :initial-point ,initial-point
-    :collect-postprocess ,collect-postprocess
-    :include-invisible ,include-invisible))
+(defmacro holymotion-derive-cmd (cmd)
+  "Create and name a holymotion from CMD."
+  `(progn
+     (holymotion-make-motion ,(intern (concat "holymotion-" (symbol-name cmd)))
+                             #',cmd
+                             :scope 'line)))
 
-(cl-defmacro holymotion-define (key
-                            motions
-                            &key
-                            name
-                            pre-hook
-                            post-hook
-                            bind
-                            scope
-                            all-windows
-                            initial-point
-                            push-jump
-                            collect-postprocess
-                            include-invisible)
-  "Automatically create and bind an evil motion"
-  `(define-key ,(if all-windows
-                    'evil-normal-state-map
-                  'evil-motion-state-map)
-     ,key
-     (holymotion-create ,motions
-                    :name ,name
-                    :pre-hook ,pre-hook
-                    :post-hook ,post-hook
-                    :bind ,bind
-                    :scope ,scope
-                    :all-windows ,all-windows
-                    :initial-point ,initial-point
-                    :push-jump ,push-jump
-                    :collect-postprocess ,collect-postprocess
-                    :include-invisible ,include-invisible)))
+;; (defun holymotion-derive-cmd (cmd)
+;;   "Create and name a holymotion from CMD."
+;;   (holymotion-make-motion (intern (concat "holymotion-" (symbol-name cmd)))
+;;                           (cmd)))
 
-;;;###autoload (autoload 'holymotion-motion-forward-word-begin "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-forward-word-begin #'evil-forward-word-begin
+ holymotion-forward-to-word #'forward-to-word
  :scope 'line)
 
-;;;###autoload (autoload 'holymotion-motion-forward-WORD-begin "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-forward-WORD-begin #'evil-forward-WORD-begin
+ holymotion-forward-whitespace #'forward-whitespace
  :scope 'line)
 
-;;;###autoload (autoload 'holymotion-motion-forward-word-end "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-forward-word-end #'evil-forward-word-end
+ holymotion-forward-word #'forward-word
  :scope 'line)
 
-;;;###autoload (autoload 'holymotion-motion-forward-WORD-end "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-forward-WORD-end #'evil-forward-WORD-end
+ holymotion-backward-to-word #'backward-to-word
  :scope 'line)
 
-;;;###autoload (autoload 'holymotion-motion-backward-word-begin "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-backward-word-begin #'evil-backward-word-begin
+ holymotion-backward-whitespace #'sp-backward-whitespace
  :scope 'line)
 
-;;;###autoload (autoload 'holymotion-motion-backward-WORD-begin "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-backward-WORD-begin #'evil-backward-WORD-begin
+ holymotion-backward-word #'backward-word
  :scope 'line)
 
-;;;###autoload (autoload 'holymotion-motion-backward-word-end "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-backward-word-end #'evil-backward-word-end
- :scope 'line)
-
-;;;###autoload (autoload 'holymotion-motion-backward-WORD-end "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-backward-WORD-end #'evil-backward-WORD-end
- :scope 'line)
-
-;;;###autoload (autoload 'holymotion-motion-next-line "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-next-line #'next-line
- :pre-hook (setq evil-this-type 'line)
+ holymotion-next-line #'next-line
  :bind ((temporary-goal-column (current-column))
         (line-move-visual nil)))
 
-;;;###autoload (autoload 'holymotion-motion-previous-line "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-previous-line #'previous-line
- :pre-hook (setq evil-this-type 'line)
+ holymotion-previous-line #'previous-line
  :bind ((temporary-goal-column (current-column))
         (line-move-visual nil)))
 
-;;;###autoload (autoload 'holymotion-motion-next-visual-line "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-next-visual-line #'next-line
- :pre-hook (setq evil-this-type 'line)
+ holymotion-next-visual-line #'next-line
  :bind ((temporary-goal-column (current-column))
         (line-move-visual t)))
 
-;;;###autoload (autoload 'holymotion-motion-previous-visual-line "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-previous-visual-line #'previous-line
- :pre-hook (setq evil-this-type 'line)
+ holymotion-previous-visual-line #'previous-line
  :bind ((temporary-goal-column (current-column))
         (line-move-visual t)))
 
-;;;###autoload (autoload 'holymotion-motion-find-char-to "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-find-char-to #'evil-repeat-find-char
- :pre-hook (save-excursion
-             (setq evil-this-type 'inclusive)
-             (call-interactively #'evil-find-char-to))
- :bind ((evil-cross-lines t)))
+ holymotion-backward-beginning-of-defun #'beginning-of-defun
+ )
 
-;;;###autoload (autoload 'holymotion-motion-find-char-to-backward "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-find-char-to-backward #'evil-repeat-find-char
- :pre-hook (save-excursion
-             (setq evil-this-type 'exclusive)
-             (call-interactively #'evil-find-char-to-backward))
- :bind ((evil-cross-lines t)))
+ holymotion-backward-sentence #'backward-sentence)
 
-;;;###autoload (autoload 'holymotion-motion-find-char "holymotion" nil t)
+;;;###autoload
 (holymotion-make-motion
- holymotion-motion-find-char #'evil-repeat-find-char
- :pre-hook (save-excursion
-             (setq evil-this-type 'inclusive)
-             (call-interactively #'evil-find-char))
- :bind ((evil-cross-lines t)))
+ holymotion-forward-sentence #'forward-sentence)
 
-;;;###autoload (autoload 'holymotion-motion-find-char-backward "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-find-char-backward #'evil-repeat-find-char
- :pre-hook (save-excursion
-             (setq evil-this-type 'exclusive)
-             (call-interactively #'evil-find-char-backward))
- :bind ((evil-cross-lines t)))
+;;;###autoload
+;; (holymotion-make-motion
+;;  holymotion-search-next #'evil-search-next
+;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
+;;          #'ignore)
+;;         (search-highlight nil)))
 
-;;;###autoload (autoload 'holymotion-motion-backward-section-begin "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-backward-section-begin #'evil-backward-section-begin
- :pre-hook (setq evil-this-type 'line))
+;;;###autoload
+;; (holymotion-make-motion
+;;  holymotion-search-previous #'evil-search-previous
+;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
+;;          #'ignore)
+;;         (search-highlight nil)))
 
-;;;###autoload (autoload 'holymotion-motion-backward-section-end "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-backward-section-end #'evil-backward-section-end
- :pre-hook (setq evil-this-type 'line))
+;;;###autoload
+;; (holymotion-make-motion
+;;  holymotion-search-word-forward #'evil-search-word-forward
+;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
+;;          #'ignore)
+;;         (search-highlight nil)))
 
-;;;###autoload (autoload 'holymotion-motion-forward-section-begin "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-forward-section-begin #'evil-forward-section-begin
- :pre-hook (setq evil-this-type 'line))
-
-;;;###autoload (autoload 'holymotion-motion-forward-section-end "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-forward-section-end #'evil-forward-section-end
- :pre-hook (setq evil-this-type 'line))
-
-;;;###autoload (autoload 'holymotion-motion-backward-sentence-begin "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-backward-sentence-begin #'evil-backward-sentence-begin)
-
-;;;###autoload (autoload 'holymotion-motion-forward-sentence-begin "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-forward-sentence-begin #'evil-forward-sentence-begin)
-
-;;;###autoload (autoload 'holymotion-motion-search-next "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-search-next #'evil-search-next
- :bind (((symbol-function #'isearch-lazy-highlight-update)
-         #'ignore)
-        (search-highlight nil)))
-
-;;;###autoload (autoload 'holymotion-motion-search-previous "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-search-previous #'evil-search-previous
- :bind (((symbol-function #'isearch-lazy-highlight-update)
-         #'ignore)
-        (search-highlight nil)))
-
-;;;###autoload (autoload 'holymotion-motion-search-word-forward "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-search-word-forward #'evil-search-word-forward
- :bind (((symbol-function #'isearch-lazy-highlight-update)
-         #'ignore)
-        (search-highlight nil)))
-
-;;;###autoload (autoload 'holymotion-motion-search-word-backward "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-search-word-backward #'evil-search-word-backward
- :bind (((symbol-function #'isearch-lazy-highlight-update)
-         #'ignore)
-        (search-highlight nil)))
-
-;;;###autoload (autoload 'holymotion-motion-previous-line-first-non-blank "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-previous-line-first-non-blank #'evil-previous-line-first-non-blank)
-
-;;;###autoload (autoload 'holymotion-motion-next-line-first-non-blank "holymotion" nil t)
-(holymotion-make-motion
- holymotion-motion-next-line-first-non-blank #'evil-next-line-first-non-blank)
+;;;###autoload
+;; (holymotion-make-motion
+;;  holymotion-search-word-backward #'evil-search-word-backward
+;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
+;;          #'ignore)
+;;         (search-highlight nil)))
 
 ;;;###autoload
 (defun holymotion-default-keybindings (prefix)
-  "Define easymotions for all motions evil defines by default"
+  "Define holymotions for all motions evil defines by default"
   (define-key evil-motion-state-map (kbd prefix) holymotion-map))
-
-(define-key holymotion-map "w" #'holymotion-motion-forward-word-begin)
-(define-key holymotion-map "W" #'holymotion-motion-forward-WORD-begin)
-(define-key holymotion-map "e" #'holymotion-motion-forward-word-end)
-(define-key holymotion-map "E" #'holymotion-motion-forward-WORD-end)
-(define-key holymotion-map "b" #'holymotion-motion-backward-word-begin)
-(define-key holymotion-map "B" #'holymotion-motion-backward-WORD-begin)
-(define-key holymotion-map "ge" #'holymotion-motion-backward-word-end)
-(define-key holymotion-map "gE" #'holymotion-motion-backward-WORD-end)
-(define-key holymotion-map "j" #'holymotion-motion-next-line)
-(define-key holymotion-map "k" #'holymotion-motion-previous-line)
-(define-key holymotion-map "gj" #'holymotion-motion-next-visual-line)
-(define-key holymotion-map "gk" #'holymotion-motion-previous-visual-line)
-(define-key holymotion-map "t" #'holymotion-motion-find-char-to)
-(define-key holymotion-map "T" #'holymotion-motion-find-char-to-backward)
-(define-key holymotion-map "f" #'holymotion-motion-find-char)
-(define-key holymotion-map "F" #'holymotion-motion-find-char-backward)
-(define-key holymotion-map "[[" #'holymotion-motion-backward-section-begin)
-(define-key holymotion-map "[]" #'holymotion-motion-backward-section-end)
-(define-key holymotion-map "]]" #'holymotion-motion-forward-section-begin)
-(define-key holymotion-map "][" #'holymotion-motion-forward-section-end)
-(define-key holymotion-map "(" #'holymotion-motion-backward-sentence-begin)
-(define-key holymotion-map ")" #'holymotion-motion-forward-sentence-begin)
-(define-key holymotion-map "n" #'holymotion-motion-search-next)
-(define-key holymotion-map "N" #'holymotion-motion-search-previous)
-(define-key holymotion-map "*" #'holymotion-motion-search-word-forward)
-(define-key holymotion-map "#" #'holymotion-motion-search-word-backward)
-(define-key holymotion-map "-" #'holymotion-motion-previous-line-first-non-blank)
-(define-key holymotion-map "+" #'holymotion-motion-next-line-first-non-blank)
 
 (provide 'holymotion)
 ;;; holymotion.el ends here
