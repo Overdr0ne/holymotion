@@ -21,7 +21,8 @@
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; This is a clone of the popular holymotion package for vim, which
+;; This code was shamelessly forked from https://github.com/PythonNut/evil-easymotion
+;; which was itself a clone of the popular holymotion package for vim, which
 ;; describes itself in these terms:
 
 ;; > EasyMotion provides a much simpler way to use some motions in vim.
@@ -34,8 +35,6 @@
 
 ;; Usage/status
 ;; ============
-
-;; This code was shamelessly forked from https://github.com/PythonNut/evil-easymotion
 
 ;; Currently most motions are supported, and it's easy to define your own holymotions.
 
