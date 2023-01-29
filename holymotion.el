@@ -279,11 +279,6 @@ INCLUDE-INVISIBLE results with invisible overlay."
                              #',cmd
                              :scope 'line)))
 
-;; (defun holymotion-derive-cmd (cmd)
-;;   "Create and name a holymotion from CMD."
-;;   (holymotion-make-motion (intern (concat "holymotion-" (symbol-name cmd)))
-;;                           (cmd)))
-
 ;;;###autoload
 (holymotion-make-motion
  holymotion-forward-to-word #'forward-to-word
@@ -345,34 +340,6 @@ INCLUDE-INVISIBLE results with invisible overlay."
 ;;;###autoload
 (holymotion-make-motion
  holymotion-forward-sentence #'forward-sentence)
-
-;;;###autoload
-;; (holymotion-make-motion
-;;  holymotion-search-next #'evil-search-next
-;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
-;;          #'ignore)
-;;         (search-highlight nil)))
-
-;;;###autoload
-;; (holymotion-make-motion
-;;  holymotion-search-previous #'evil-search-previous
-;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
-;;          #'ignore)
-;;         (search-highlight nil)))
-
-;;;###autoload
-;; (holymotion-make-motion
-;;  holymotion-search-word-forward #'evil-search-word-forward
-;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
-;;          #'ignore)
-;;         (search-highlight nil)))
-
-;;;###autoload
-;; (holymotion-make-motion
-;;  holymotion-search-word-backward #'evil-search-word-backward
-;;  :bind (((symbol-function #'isearch-lazy-highlight-update)
-;;          #'ignore)
-;;         (search-highlight nil)))
 
 (provide 'holymotion)
 ;;; holymotion.el ends here
