@@ -36,17 +36,12 @@
 ;; Usage/status
 ;; ============
 
-;; Currently most motions are supported, and it's easy to define your own holymotions.
-
-;;   (evilem-define (kbd "SPC w") 'evil-forward-word-begin)
-
-;; To define holymotions for all motions that evil defines by default, add
-
-;;   (evilem-default-keybindings "SPC")
-
-;; This binds all motions under the prefix `SPC` in `holymotion-state-map`.  This is not done by default for motions defined manually.  You will need to supply the prefix.
-
-;; More advanced use-cases are detailed in the github README.
+;; A handful of motions are provided, prefixed with `holymotion`
+;; It's easy to define your own holymotions:
+;; (holymotion-make-motion
+;;  holymotion-forward-to-word #'forward-to-word
+;;  :scope 'line)
+;;;; More advanced use-cases are detailed in README.md.
 
 ;;; Code:
 (require 'cl-lib)
@@ -96,22 +91,22 @@
 (defun holymotion--collect (func &optional
                                  scope
                                  all-windows
-                                 initial-point
+                                 initial-motion
                                  collect-postprocess
                                  include-invisible)
   "Repeatedly execute FUNC and collect the cursor positions into a list.
 
 Optionally:
 
-Operate within SCOPE, see `bounds-of-thing-at-point’.
+SCOPE: An object to limit the scope of an holymotion. `object` may be any *thing* understood by `thing-at-point`. In practice, `object` will often be `'line`.
 
 ALL-WINDOWS to consider in search of candidates.
 
-INITIAL-POINT position to start search.
+INITIAL-MOTION: When specified, `(goto-char (funcall callable))` is run before the motion is executed. For example, use this to jump to the BOL of each line as in holymotion with `:initial-position #'point-at-bol`. Unlike in `:pre-hook`, `callable` is run once per window when `:all-windows` is specified.
 
-Use COLLECT-POSTPROCESS to apply any filtering after collection.
+COLLECT-POSTPROCESS: When specified, `callable` is called on the collected list of points (which is of the form `((point window)...)`). Otherwise, the default function, which sorts the points in order of increasing distance from `(point)`, is used.
 
-INCLUDE-INVISIBLE results with invisible overlay."
+INCLUDE-INVISIBLE: When `expr` is non-`nil`, the motion will not skip over invisible overlays. This may be required for motions that generate dramatically different sets of points if they are started at different locations. This defaults to nil."
   (cl-letf ((points nil)
             (point nil)
             (avy-all-windows all-windows)
@@ -123,8 +118,8 @@ INCLUDE-INVISIBLE results with invisible overlay."
         (avy-dowindows current-prefix-arg
           (save-excursion
             (save-restriction
-              (when initial-point
-                (goto-char (funcall initial-point)))
+              (when initial-motion
+                (goto-char (funcall initial-motion)))
               (cl-destructuring-bind (beg . end)
                   (if scope
                       (bounds-of-thing-at-point scope)
@@ -174,7 +169,7 @@ INCLUDE-INVISIBLE results with invisible overlay."
                                      bind
                                      scope
                                      all-windows
-                                     initial-point
+                                     initial-motion
                                      collect-postprocess
                                      include-invisible)
   "Automatically define an holymotion for FUNCS, naming it NAME.
@@ -183,17 +178,15 @@ Keywords:
 
 Add PRE-HOOK or POST-HOOK to further customize your motion command.
 
-BIND variables before jumping.
+BIND: A list of forms to bind around the entire holymotion. `forms` may be any bindings accepted by `cl-letf’.
 
-Operate within SCOPE, see `bounds-of-thing-at-point’.
+SCOPE: An object to limit the scope of an holymotion. `object` may be any *thing* understood by `thing-at-point`. In practice, `object` will often be `'line`.
 
-ALL-WINDOWS to consider in search of candidates.
+INITIAL-MOTION: When specified, `(goto-char (funcall callable))` is run before the motion is executed. For example, use this to jump to the BOL of each line as in holymotion with `:initial-position #'point-at-bol`. Unlike in `:pre-hook`, `callable` is run once per window when `:all-windows` is specified.
 
-INITIAL-POINT position to start search.
+COLLECT-POSTPROCESS: When specified, `callable` is called on the collected list of points (which is of the form `((point window)...)`). Otherwise, the default function, which sorts the points in order of increasing distance from `(point)`, is used.
 
-Use COLLECT-POSTPROCESS to apply any filtering after collection.
-
-INCLUDE-INVISIBLE results with invisible overlay."
+INCLUDE-INVISIBLE: When `expr` is non-`nil`, the motion will not skip over invisible overlays. This may be required for motions that generate dramatically different sets of points if they are started at different locations. This defaults to nil."
   `(defun ,name ()
      (interactive)
      (require 'avy)
@@ -205,7 +198,7 @@ INCLUDE-INVISIBLE results with invisible overlay."
          (holymotion--jump (holymotion--collect ,funcs
                                                 ,scope
                                                 ,all-windows
-                                                ,initial-point
+                                                ,initial-motion
                                                 ,collect-postprocess
                                                 ,include-invisible))
          ,(when post-hook `(funcall ,(if (functionp post-hook)
