@@ -1,11 +1,13 @@
 holymotion
 ===============
 
-This code was shamelessly forked from https://github.com/PythonNut/evil-easymotion which was itself a clone of the popular holymotion package for vim, which describes itself in these terms:
+[evil-easymotion](https://github.com/PythonNut/evil-easymotion), purged of evil...
+
+In order to remove the dependency on evil, this code was forked from https://github.com/PythonNut/evil-easymotion, which was itself a clone of the popular easymotion package for vim, which describes itself in these terms:
 
 > Easymotion provides a much simpler way to use some motions in vim. It takes the <number> out of <number>w or <number>f{char} by highlighting all possible choices and allowing you to press one key to jump directly to the target.
 
-The purpose of this fork was to remove all dependency on Evil, and all the complexity accompanied with that dependency.
+The purpose of this fork was to remove all dependency on Evil, to provide a simple, easily extensible API.
 
 Basic Usage
 ===========
@@ -67,6 +69,11 @@ In addition, various keyword arguments may be used to modify the behavior of the
 * `:include-invisible expr`
 
     When `expr` is non-`nil`, the motion will not skip over invisible overlays. This may be required for motions that generate dramatically different sets of points if they are started at different locations. This defaults to `nil`.
+
+Tips on Binding Keys
+=======
+
+Personally, I have created an equivalent holymotion for most of my standard motions. Then, I just add a modifier when I want the holymotion version. For example, if you use `C-n` for `next-line`, you could bind `C-M-n` for your `holymotion-next-line`. Another scheme I’ve used, if you have the `Alt`(`A-`) modifier available to you, you could just use that as your modifier instead, since no keys are bound to `Alt` by default in Emacs.
 
 Credits
 =======
