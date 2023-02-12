@@ -2,7 +2,7 @@
 
 ;; Author: Overdr0ne <scmorris.dev@gmail.com>
 ;; Keywords: convenience
-;; Version: 20160228
+;; Version: 20230210
 ;; Package-Requires: ((emacs "24") (avy "0.3.0") (cl-lib "0.5"))
 
 ;;; License:
