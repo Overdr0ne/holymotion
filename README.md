@@ -7,7 +7,9 @@ In order to remove the dependency on evil, this code was forked from https://git
 
 > Easymotion provides a much simpler way to use some motions in vim. It takes the <number> out of <number>w or <number>f{char} by highlighting all possible choices and allowing you to press one key to jump directly to the target.
 
-The purpose of this fork was to remove all dependency on Evil, to provide a simple, easily extensible API.
+Below is a gif showing holymotion versions of forward/backward-word and next/previous-line.
+
+![](demo.gif)
 
 Basic Usage
 ===========
