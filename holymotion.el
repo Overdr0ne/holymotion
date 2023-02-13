@@ -94,19 +94,30 @@
                                  initial-motion
                                  collect-postprocess
                                  include-invisible)
-  "Repeatedly execute FUNC and collect the cursor positions into a list.
+  "Repeatedly execute FUNC and collect the cursor positions.
 
 Optionally:
 
-SCOPE: An object to limit the scope of an holymotion. `object` may be any *thing* understood by `thing-at-point`. In practice, `object` will often be `'line`.
+SCOPE: An object to limit the scope of an holymotion.  'object' may be any
+*thing* understood by `thing-at-point'.  In practice, 'object' will often be
+'line'.
 
 ALL-WINDOWS to consider in search of candidates.
 
-INITIAL-MOTION: When specified, `(goto-char (funcall callable))` is run before the motion is executed. For example, use this to jump to the BOL of each line as in holymotion with `:initial-position #'point-at-bol`. Unlike in `:pre-hook`, `callable` is run once per window when `:all-windows` is specified.
+INITIAL-MOTION: When specified, (goto-char (funcall callable)) is run before
+the motion is executed.  For example, use this to jump to the BOL of each line
+as in holymotion with :initial-position #'point-at-bol.  Unlike in
+:pre-hook, callable is run once per window when :all-windows is specified.
 
-COLLECT-POSTPROCESS: When specified, `callable` is called on the collected list of points (which is of the form `((point window)...)`). Otherwise, the default function, which sorts the points in order of increasing distance from `(point)`, is used.
+COLLECT-POSTPROCESS: When specified, callable is called on the collected list
+of points (which is of the form ((point window)...)).  Otherwise, the default
+function, which sorts the points in order of increasing distance from `(point)',
+is used.
 
-INCLUDE-INVISIBLE: When `expr` is non-`nil`, the motion will not skip over invisible overlays. This may be required for motions that generate dramatically different sets of points if they are started at different locations. This defaults to nil."
+INCLUDE-INVISIBLE: When 'expr' is non-nil, the motion will not skip over
+invisible overlays.  This may be required for motions that generate dramatically
+different sets of points if they are started at different locations.  This
+defaults to nil."
   (cl-letf ((points nil)
             (point nil)
             (avy-all-windows all-windows)
@@ -178,15 +189,27 @@ Keywords:
 
 Add PRE-HOOK or POST-HOOK to further customize your motion command.
 
-BIND: A list of forms to bind around the entire holymotion. `forms` may be any bindings accepted by `cl-letf’.
+BIND: A list of forms to bind around the entire holymotion.  'forms' may be any
+bindings accepted by `cl-letf'.
 
-SCOPE: An object to limit the scope of an holymotion. `object` may be any *thing* understood by `thing-at-point`. In practice, `object` will often be `'line`.
+SCOPE: An ’object’ to limit the scope of an holymotion.  'object' may be any
+*thing* understood by `thing-at-point'.  In practice, 'object' will often be
+'line'.
 
-INITIAL-MOTION: When specified, `(goto-char (funcall callable))` is run before the motion is executed. For example, use this to jump to the BOL of each line as in holymotion with `:initial-position #'point-at-bol`. Unlike in `:pre-hook`, `callable` is run once per window when `:all-windows` is specified.
+INITIAL-MOTION: When specified, (goto-char (funcall callable)) is run before
+the motion is executed.  For example, use this to jump to the BOL of each line
+as in holymotion with :initial-position #'point-at-bol.  Unlike in
+:pre-hook, 'callable' is run once per window when :all-windows is specified.
 
-COLLECT-POSTPROCESS: When specified, `callable` is called on the collected list of points (which is of the form `((point window)...)`). Otherwise, the default function, which sorts the points in order of increasing distance from `(point)`, is used.
+COLLECT-POSTPROCESS: When specified, 'callable' is called on the collected list
+of points (which is of the form ((point window)...)).  Otherwise, the default
+function, which sorts the points in order of increasing distance from (point),
+is used.
 
-INCLUDE-INVISIBLE: When `expr` is non-`nil`, the motion will not skip over invisible overlays. This may be required for motions that generate dramatically different sets of points if they are started at different locations. This defaults to nil."
+INCLUDE-INVISIBLE: When 'expr' is non-nil, the motion will not skip over
+invisible overlays.  This may be required for motions that generate dramatically
+different sets of points if they are started at different locations.  This
+defaults to nil."
   `(defun ,name ()
      (interactive)
      (require 'avy)
