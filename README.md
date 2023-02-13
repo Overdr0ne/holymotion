@@ -11,6 +11,25 @@ Below is a gif showing holymotion versions of forward/backward-word and next/pre
 
 ![](demo.gif)
 
+Installation
+===========
+
+I just use `use-package` like so:
+
+``` elisp
+(use-package holymotion
+  :straight (holymotion :type git
+                        :host github
+                        :repo "Overdr0ne/holymotion"
+                        :branch "main")
+  :config
+  ;; define some custom motions, I'm using smartparens here
+  (holymotion-make-motion
+   holymotion-forward-sexp #'sp-forward-sexp)
+  (holymotion-make-motion
+   holymotion-backward-sexp #'sp-backward-sexp))
+```
+
 Basic Usage
 ===========
 
