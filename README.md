@@ -96,6 +96,8 @@ Tips on Binding Keys
 
 One way to bind your holymotions is to use [prefix keys](https://www.gnu.org/software/emacs/manual/html_node/elisp/Prefix-Keys.html). An empty `holymotion-map` has been provided for this purpose. So you could bind `holymotion-map` to some prefix key, like `M-h`, then bind all of your holymotions to their normal analogs: `C-n` to `holymotion-next-line`, `C-p` to `holymotion-previous-line`, etc.
 
+Another way is to map your keys within the `holymotion-mode-map`. Then, you can activate/deactivate that map by enabling/disabling the holymotion-minor-mode, and any keybindings within that keymap will override your current keybindings when enabled. `describe-command` on `holymotion-mode` for more details. This ability to replace your keybindings would then give you the shortest keybindings possible, or even replacing normally self-inserting keys; nice for when you are just navigating around.
+
 Personally, I have created an equivalent holymotion for most of my standard motions. Then, I just add a modifier when I want the holymotion version. For example, if you use `C-n` for `next-line`, you could bind `C-M-n` for your `holymotion-next-line`. Another scheme I’ve used, if you have the `Alt`(`A-`) modifier available to you, you could just use that as your modifier instead, since no keys are bound to `Alt` by default in Emacs.
 
 Credits
