@@ -241,67 +241,7 @@ defaults to nil."
                              #',cmd
                              :scope 'line)))
 
-;;;###autoload
-(holymotion-make-motion
- holymotion-forward-to-word #'forward-to-word
- :scope 'line)
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-forward-whitespace #'forward-whitespace
- :scope 'line)
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-forward-word #'forward-word
- :scope 'line)
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-backward-to-word #'backward-to-word
- :scope 'line)
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-backward-word #'backward-word
- :scope 'line)
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-next-line #'next-line
- :bind ((temporary-goal-column (current-column))
-        (line-move-visual nil)))
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-previous-line #'previous-line
- :bind ((temporary-goal-column (current-column))
-        (line-move-visual nil)))
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-next-visual-line #'next-line
- :bind ((temporary-goal-column (current-column))
-        (line-move-visual t)))
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-previous-visual-line #'previous-line
- :bind ((temporary-goal-column (current-column))
-        (line-move-visual t)))
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-backward-beginning-of-defun #'beginning-of-defun
- )
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-backward-sentence #'backward-sentence)
-
-;;;###autoload
-(holymotion-make-motion
- holymotion-forward-sentence #'forward-sentence)
+(require 'holymotion-lib)
 
 (provide 'holymotion)
 ;;; holymotion.el ends here
