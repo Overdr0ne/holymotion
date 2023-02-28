@@ -100,6 +100,8 @@ Another way is to map your keys within the `holymotion-mode-map`. Then, you can 
 
 Personally, I have created an equivalent holymotion for most of my standard motions. Then, I just add a modifier when I want the holymotion version. For example, if you use `C-n` for `next-line`, you could bind `C-M-n` for your `holymotion-next-line`. Another scheme I’ve used, if you have the `Alt`(`A-`) modifier available to you, you could just use that as your modifier instead, since no keys are bound to `Alt` by default in Emacs.
 
+Finally, if you just want to replace a normal motion command like `beginning-of-line` with your holymotion equivalent, you can always use the [https://www.gnu.org/software/emacs/manual/html_node/elisp/Remapping-Commands.html](remap) feature of `define-key`.
+
 Credits
 =======
 I'm deeply indebted to:
