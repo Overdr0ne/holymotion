@@ -1,7 +1,7 @@
 holymotion
 ===============
 
-[](./poltergeist.jpg)
+![](poltergeist.jpg)
 
 [evil-easymotion](https://github.com/PythonNut/evil-easymotion), purged of evil...
 
