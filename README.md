@@ -1,9 +1,7 @@
-holymotion
+holymotion: [evil-easymotion](https://github.com/PythonNut/evil-easymotion), purged of evil...
 ===============
 
 ![](poltergeist.jpg)
-
-[evil-easymotion](https://github.com/PythonNut/evil-easymotion), purged of evil...
 
 In order to remove the dependency on evil, this code was forked from https://github.com/PythonNut/evil-easymotion, which was itself a clone of the popular easymotion package for vim, which describes itself in these terms:
 
